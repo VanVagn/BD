@@ -1,49 +1,40 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import org.postgresql.util.PSQLException;
+
+import java.sql.*;
 import java.util.Properties;
 
 public class Main {
 
     public static void main(String[] args) {
-        try {
 
-            Class.forName("org.postgresql.Driver");
-            String url = "jdbc:postgresql://localhost:5432/postgres";
 
-            Properties authorization = new Properties();
-            authorization.put("user", "postgres");
-            authorization.put("password", "postgres");
+            String url = "jdbc:postgresql://localhost:5432/training_hw_5";
+            String user = "postgres";
+            String password = "Alex1508";
 
-            Connection connection = DriverManager.getConnection(url, authorization);
 
-            Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
-                    ResultSet.CONCUR_UPDATABLE);
+            try {
+                Connection connection = DriverManager.getConnection(url, user, password);
 
-            ResultSet table = statement.executeQuery("SELECT * FROM audit_department");
+                Statement statement = connection.createStatement();
+                String sql = "SELECT * FROM audit_department"; // SQL-запрос для выборки данных из таблицы
+                ResultSet resultSet = statement.executeQuery(sql);
 
-            table.first();
-            for (int j = 1; j <= table.getMetaData().getColumnCount(); j++) {
-                System.out.print(table.getMetaData().getColumnName(j) + "\t\t");
-            }
-            System.out.println();
+                while (resultSet.next()) {
+                    String id = resultSet.getString("revisionNumber");
+                    String name = resultSet.getString("productType");
+                    String age = resultSet.getString("locationAddress");
 
-            table.beforeFirst();
-            while (table.next()) {
-                for (int j = 1; j <= table.getMetaData().getColumnCount(); j++) {
-                    System.out.print(table.getString(j) + "\t\t");
+                    System.out.println("revisionNumber: " + id + ", productType: " + name + ", locationAddress: " + age);
                 }
-                System.out.println();
+
+                resultSet.close();
+                statement.close();
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
 
-            if (table != null) { table.close(); }
-            if (statement != null) { statement.close(); }
-            if (connection != null) { connection.close(); }
-        } catch (Exception e) {
-            System.err.println("Error accessing database!");
-            e.printStackTrace();
-        }
     }
-
 }
+
